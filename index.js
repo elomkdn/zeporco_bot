@@ -36,8 +36,8 @@ bot.getMe().then((botInfo) => {
 // NOUVEAU/MODIFIÉ: Logique de l'IA (Hugging Face)
 // ===============================================
 
-// Modèle d'IA de Hugging Face. C'est ici que tu peux changer de modèle
-const HUGGINGFACE_MODEL_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2";
+// MODIFIÉ: Utilisation d'un modèle très populaire pour corriger l'erreur 404
+const HUGGINGFACE_MODEL_URL = "https://api-inference.huggingface.co/models/google/gemma-7b-it";
 
 // Personnalité de La Porto-Novienne (ton prompt)
 const PERSONNALITE = `Tu es La Porto-Novienne, une femme béninoise de Porto-Novo. 
