@@ -1,20 +1,19 @@
-const axios = require('axios');
 const TelegramBot = require('node-telegram-bot-api');
+const MistralClient = require('@mistralai/mistralai').default;
 
 // ===============================================
 // Configuration des tokens
-// Les VRAIS tokens sont sur Railway !
 // ===============================================
 const token = process.env.BOT_TOKEN || 'TON_TOKEN_ICI';
-const hfToken = process.env.HUGGINGFACE_TOKEN || 'TON_HF_TOKEN';
+const mistralToken = process.env.MISTRAL_TOKEN || 'TON_MISTRAL_TOKEN';
 
 if (!token || token === 'TON_TOKEN_ICI') {
   console.error('❌ ERREUR : Token Telegram manquant ! Vérifie ta variable BOT_TOKEN');
   process.exit(1);
 }
 
-if (!hfToken || hfToken === 'TON_HF_TOKEN') {
-  console.error('❌ ERREUR : Token Hugging Face manquant ! Vérifie ta variable HUGGINGFACE_TOKEN');
+if (!mistralToken || mistralToken === 'TON_MISTRAL_TOKEN') {
+  console.error('❌ ERREUR : Token Mistral manquant ! Vérifie ta variable MISTRAL_TOKEN');
   process.exit(1);
 }
 
@@ -22,6 +21,7 @@ console.log('🚀 Démarrage du bot...');
 console.log('📡 Token Telegram configuré :', token.substring(0, 10) + '...');
 
 const bot = new TelegramBot(token, { polling: true });
+const client = new MistralClient(mistralToken);
 
 // Test de connexion
 bot.getMe().then((botInfo) => {
@@ -33,11 +33,8 @@ bot.getMe().then((botInfo) => {
 });
 
 // ===============================================
-// NOUVEAU/MODIFIÉ: Logique de l'IA (Hugging Face)
+// Logique de l'IA (Mistral)
 // ===============================================
-
-// MODIFIÉ: Utilisation d'un modèle très populaire pour corriger l'erreur 404
-const HUGGINGFACE_MODEL_URL = "https://api-inference.huggingface.co/models/google/gemma-7b-it";
 
 // Personnalité de La Porto-Novienne (ton prompt)
 const PERSONNALITE = `Tu es La Porto-Novienne, une femme béninoise de Porto-Novo. 
@@ -59,28 +56,22 @@ RÈGLES :
 - Clash gentiment si on dit des bêtises sur la cuisine
 - Maximum 200 mots par réponse
 
-Réponds comme La Porto-Novienne à ce message :`;
+Réponds comme La Porto-Novienne.`;
 
-// Fonction pour appeler l'IA de Hugging Face
+// Fonction pour appeler l'IA de Mistral
 async function obtenirReponseIA(messageUtilisateur) {
   try {
-    const payload = {
-      inputs: `${PERSONNALITE}\n\nMessage: "${messageUtilisateur}"`,
-    };
+    const chatCompletion = await client.chat({
+      model: 'mistral-tiny', // Modèle de Mistral
+      messages: [
+        { role: 'system', content: PERSONNALITE },
+        { role: 'user', content: messageUtilisateur }
+      ]
+    });
     
-    const headers = {
-      "Authorization": `Bearer ${hfToken}`,
-      "Content-Type": "application/json"
-    };
-
-    const response = await axios.post(HUGGINGFACE_MODEL_URL, payload, { headers: headers });
-    
-    let reponseIA = response.data[0].generated_text;
-    reponseIA = reponseIA.replace(PERSONNALITE, '').trim(); // Nettoyer la réponse
-
-    return reponseIA;
+    return chatCompletion.choices[0].message.content.trim();
   } catch (error) {
-    console.error('❌ Erreur API Hugging Face:', error.message);
+    console.error('❌ Erreur API Mistral:', error.message);
     // Fallback si l'IA ne répond pas
     return getReponseSecours(messageUtilisateur);
   }
@@ -160,7 +151,7 @@ bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
   const message = `🇧🇯 Salut ! Moi c'est La Porto-Novienne ! 🇧🇯
 
-Je suis maintenant alimentée par un modèle de Hugging Face. Je peux discuter de TOUT... mais surtout de PORC ! 🐷
+Je suis maintenant alimentée par Mistral AI ! Je peux discuter de TOUT... mais surtout de PORC ! 🐷
 
 Tu peux me parler normalement, je vais te répondre avec ma vraie personnalité porto-novienne !
 
@@ -173,7 +164,7 @@ bot.onText(/\/help/, (msg) => {
   const chatId = msg.chat.id;
   const message = `🤖 LA PORTO-NOVIENNE ! 
 
-✨ **NOUVEAU** : Je suis maintenant alimentée par Hugging Face !
+✨ **NOUVEAU** : Je suis maintenant alimentée par Mistral AI !
 Je peux discuter de tout avec ma vraie personnalité !
 
 🗣️ **Parle-moi normalement** de :
