@@ -2,8 +2,8 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const TelegramBot = require('node-telegram-bot-api');
 
 // ===============================================
-// NOUVEAU: Configuration des tokens
-// Sécurité: Les VRAIS tokens sont sur Railway !
+// Configuration des tokens
+// Les VRAIS tokens sont sur Railway !
 // ===============================================
 const token = process.env.BOT_TOKEN || 'TON_TOKEN_ICI';
 const geminiToken = process.env.GEMINI_TOKEN || 'TON_GEMINI_TOKEN_ICI';
@@ -34,7 +34,7 @@ bot.getMe().then((botInfo) => {
 });
 
 // ===============================================
-// CODE MODIFIÉ: Logique de l'IA (Gemini)
+// Logique de l'IA (Gemini)
 // ===============================================
 
 // Personnalité de La Porto-Novienne (ton prompt)
@@ -59,10 +59,13 @@ RÈGLES :
 
 Réponds comme La Porto-Novienne à ce message :`;
 
+// CODE MODIFIÉ : Changement du nom du modèle Gemini
 // Fonction pour appeler l'IA Gemini
 async function obtenirReponseIA(messageUtilisateur) {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    // UTILISE CE MODÈLE PLUS SPÉCIFIQUE QUI DEVRAIT ÊTRE DISPONIBLE
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.0-pro' });
+    
     const prompt = `${PERSONNALITE}\n\nMessage: "${messageUtilisateur}"`;
     
     const result = await model.generateContent(prompt);
