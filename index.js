@@ -1,4 +1,4 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const axios = require('axios');
 const TelegramBot = require('node-telegram-bot-api');
 
 // ===============================================
@@ -6,15 +6,15 @@ const TelegramBot = require('node-telegram-bot-api');
 // Les VRAIS tokens sont sur Railway !
 // ===============================================
 const token = process.env.BOT_TOKEN || 'TON_TOKEN_ICI';
-const geminiToken = process.env.GEMINI_TOKEN || 'TON_GEMINI_TOKEN_ICI';
+const hfToken = process.env.HUGGINGFACE_TOKEN || 'TON_HF_TOKEN';
 
 if (!token || token === 'TON_TOKEN_ICI') {
   console.error('❌ ERREUR : Token Telegram manquant ! Vérifie ta variable BOT_TOKEN');
   process.exit(1);
 }
 
-if (!geminiToken || geminiToken === 'TON_GEMINI_TOKEN_ICI') {
-  console.error('❌ ERREUR : Token Gemini manquant ! Vérifie ta variable GEMINI_TOKEN');
+if (!hfToken || hfToken === 'TON_HF_TOKEN') {
+  console.error('❌ ERREUR : Token Hugging Face manquant ! Vérifie ta variable HUGGINGFACE_TOKEN');
   process.exit(1);
 }
 
@@ -22,7 +22,6 @@ console.log('🚀 Démarrage du bot...');
 console.log('📡 Token Telegram configuré :', token.substring(0, 10) + '...');
 
 const bot = new TelegramBot(token, { polling: true });
-const genAI = new GoogleGenerativeAI(geminiToken);
 
 // Test de connexion
 bot.getMe().then((botInfo) => {
@@ -34,8 +33,11 @@ bot.getMe().then((botInfo) => {
 });
 
 // ===============================================
-// Logique de l'IA (Gemini)
+// NOUVEAU/MODIFIÉ: Logique de l'IA (Hugging Face)
 // ===============================================
+
+// Modèle d'IA de Hugging Face. C'est ici que tu peux changer de modèle
+const HUGGINGFACE_MODEL_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2";
 
 // Personnalité de La Porto-Novienne (ton prompt)
 const PERSONNALITE = `Tu es La Porto-Novienne, une femme béninoise de Porto-Novo. 
@@ -59,22 +61,26 @@ RÈGLES :
 
 Réponds comme La Porto-Novienne à ce message :`;
 
-// CODE MODIFIÉ : Changement du nom du modèle Gemini
-// Fonction pour appeler l'IA Gemini
+// Fonction pour appeler l'IA de Hugging Face
 async function obtenirReponseIA(messageUtilisateur) {
   try {
-    // UTILISE CE MODÈLE PLUS SPÉCIFIQUE QUI DEVRAIT ÊTRE DISPONIBLE
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.0-pro' });
+    const payload = {
+      inputs: `${PERSONNALITE}\n\nMessage: "${messageUtilisateur}"`,
+    };
     
-    const prompt = `${PERSONNALITE}\n\nMessage: "${messageUtilisateur}"`;
-    
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+    const headers = {
+      "Authorization": `Bearer ${hfToken}`,
+      "Content-Type": "application/json"
+    };
 
-    return text.trim();
+    const response = await axios.post(HUGGINGFACE_MODEL_URL, payload, { headers: headers });
+    
+    let reponseIA = response.data[0].generated_text;
+    reponseIA = reponseIA.replace(PERSONNALITE, '').trim(); // Nettoyer la réponse
+
+    return reponseIA;
   } catch (error) {
-    console.error('❌ Erreur API Gemini:', error.message);
+    console.error('❌ Erreur API Hugging Face:', error.message);
     // Fallback si l'IA ne répond pas
     return getReponseSecours(messageUtilisateur);
   }
@@ -154,8 +160,7 @@ bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
   const message = `🇧🇯 Salut ! Moi c'est La Porto-Novienne ! 🇧🇯
 
-Maintenant je suis VRAIMENT intelligente ! 🧠✨
-Grâce à une IA, je peux discuter de TOUT... mais surtout de PORC ! 🐷
+Je suis maintenant alimentée par un modèle de Hugging Face. Je peux discuter de TOUT... mais surtout de PORC ! 🐷
 
 Tu peux me parler normalement, je vais te répondre avec ma vraie personnalité porto-novienne !
 
@@ -166,9 +171,9 @@ Alors... tu aimes le cochon ? 😏`;
 // Commande /help
 bot.onText(/\/help/, (msg) => {
   const chatId = msg.chat.id;
-  const message = `🤖 LA PORTO-NOVIENNE 2.0 ! 
+  const message = `🤖 LA PORTO-NOVIENNE ! 
 
-✨ **NOUVEAU** : Je suis maintenant alimentée par Gemini !
+✨ **NOUVEAU** : Je suis maintenant alimentée par Hugging Face !
 Je peux discuter de tout avec ma vraie personnalité !
 
 🗣️ **Parle-moi normalement** de :
