@@ -1,19 +1,19 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
 const TelegramBot = require('node-telegram-bot-api');
+const MistralClient = require('@mistralai/mistralai').default;
 
 // ===============================================
 // Configuration des tokens
 // ===============================================
 const token = process.env.BOT_TOKEN || 'TON_TOKEN_ICI';
-const geminiToken = process.env.GEMINI_TOKEN || 'TON_GEMINI_TOKEN_ICI';
+const mistralToken = process.env.MISTRAL_TOKEN || 'TON_MISTRAL_TOKEN';
 
 if (!token || token === 'TON_TOKEN_ICI') {
   console.error('❌ ERREUR : Token Telegram manquant ! Vérifie ta variable BOT_TOKEN');
   process.exit(1);
 }
 
-if (!geminiToken || geminiToken === 'TON_GEMINI_TOKEN_ICI') {
-  console.error('❌ ERREUR : Token Gemini manquant ! Vérifie ta variable GEMINI_TOKEN');
+if (!mistralToken || mistralToken === 'TON_MISTRAL_TOKEN') {
+  console.error('❌ ERREUR : Token Mistral manquant ! Vérifie ta variable MISTRAL_TOKEN');
   process.exit(1);
 }
 
@@ -21,7 +21,7 @@ console.log('🚀 Démarrage du bot...');
 console.log('📡 Token Telegram configuré :', token.substring(0, 10) + '...');
 
 const bot = new TelegramBot(token, { polling: true });
-const genAI = new GoogleGenerativeAI(geminiToken);
+const client = new MistralClient(mistralToken);
 
 // Test de connexion
 bot.getMe().then((botInfo) => {
@@ -33,7 +33,7 @@ bot.getMe().then((botInfo) => {
 });
 
 // ===============================================
-// Logique de l'IA (Gemini)
+// Logique de l'IA (Mistral)
 // ===============================================
 
 // Personnalité de La Porto-Novienne (ton prompt)
@@ -56,22 +56,22 @@ RÈGLES :
 - Clash gentiment si on dit des bêtises sur la cuisine
 - Maximum 200 mots par réponse
 
-Réponds comme La Porto-Novienne à ce message :`;
+Réponds comme La Porto-Novienne.`;
 
-// Fonction pour appeler l'IA Gemini
+// Fonction pour appeler l'IA de Mistral
 async function obtenirReponseIA(messageUtilisateur) {
   try {
-    // Utilisation du modèle gemini-1.0-pro qui a plus de chances d'être disponible
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.0-pro' });
-    const prompt = `${PERSONNALITE}\n\nMessage: "${messageUtilisateur}"`;
+    const chatCompletion = await client.chat({
+      model: 'mistral-tiny', // Modèle de Mistral
+      messages: [
+        { role: 'system', content: PERSONNALITE },
+        { role: 'user', content: messageUtilisateur }
+      ]
+    });
     
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
-
-    return text.trim();
+    return chatCompletion.choices[0].message.content.trim();
   } catch (error) {
-    console.error('❌ Erreur API Gemini:', error.message);
+    console.error('❌ Erreur API Mistral:', error.message);
     // Fallback si l'IA ne répond pas
     return getReponseSecours(messageUtilisateur);
   }
@@ -151,8 +151,7 @@ bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
   const message = `🇧🇯 Salut ! Moi c'est La Porto-Novienne ! 🇧🇯
 
-Maintenant je suis VRAIMENT intelligente ! 🧠✨
-Grâce à une IA, je peux discuter de TOUT... mais surtout de PORC ! 🐷
+Je suis maintenant alimentée par Mistral AI ! Je peux discuter de TOUT... mais surtout de PORC ! 🐷
 
 Tu peux me parler normalement, je vais te répondre avec ma vraie personnalité porto-novienne !
 
@@ -163,9 +162,9 @@ Alors... tu aimes le cochon ? 😏`;
 // Commande /help
 bot.onText(/\/help/, (msg) => {
   const chatId = msg.chat.id;
-  const message = `🤖 LA PORTO-NOVIENNE 2.0 ! 
+  const message = `🤖 LA PORTO-NOVIENNE ! 
 
-✨ **NOUVEAU** : Je suis maintenant alimentée par Gemini !
+✨ **NOUVEAU** : Je suis maintenant alimentée par Mistral AI !
 Je peux discuter de tout avec ma vraie personnalité !
 
 🗣️ **Parle-moi normalement** de :
