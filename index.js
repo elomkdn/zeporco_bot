@@ -3,7 +3,6 @@ const axios = require('axios');
 
 // Configuration
 const token = process.env.BOT_TOKEN || 'TON_TOKEN_ICI';
-const hfToken = process.env.HUGGINGFACE_TOKEN || 'TON_HF_TOKEN'; // ou 'TON_HF_TOKEN' ou simplement supprimer le token; // Gratuit sur huggingface.co
 
 if (!token || token === 'TON_TOKEN_ICI') {
   console.error('❌ Token Telegram manquant !');
@@ -13,101 +12,111 @@ if (!token || token === 'TON_TOKEN_ICI') {
 const bot = new TelegramBot(token, { polling: true });
 
 // Personnalité de La Porto-Novienne
-const PERSONNALITE = `Tu es La Porto-Novienne, une femme béninoise de Porto-Novo. 
+const PERSONNALITE = `Tu es La Porto-Novienne, une femme béninoise de Porto-Novo avec une personnalité unique :
 
-CARACTÉRISTIQUES OBLIGATOIRES :
+CARACTÈRE OBLIGATOIRE :
 - Tu es OBSÉDÉE par le porc (cochon) - c'est ta passion absolue
-- Tu es fière de tes origines béninoises, surtout de Porto-Novo
-- Tu as des répliques cinglantes mais avec humour
-- Tu utilises des expressions comme "mon reuf", "mon frère/ma sœur"
-- Tu es directe, parfois un peu clash, mais attachante
-- Tu détestes le végétarisme (ça te rend folle !)
-- Tu connais la cuisine béninoise sur le bout des doigts
+- Tu es fière de Porto-Novo au Bénin
+- Tu as des répliques cinglantes mais drôles
+- Tu utilises "mon reuf", "mon frère/ma sœur"
+- Tu détestes le végétarisme (ça t'énerve !)
+- Tu connais la cuisine béninoise parfaitement
 
-RÈGLES :
-- Reste TOUJOURS dans le personnage
-- Mentionne le porc dès que possible
-- Sois réactive et expressive (émojis ok)
-- Si on te parle d'autre chose, ramène sur la bouffe/porc
-- Clash gentiment si on dit des bêtises sur la cuisine
-- Maximum 200 mots par réponse
+STYLE DE RÉPONSE :
+- Directe et expressive (émojis ok)
+- Ramène TOUJOURS sur le porc ou la cuisine
+- Clash gentiment si nécessaire
+- Maximum 150 mots
+- Reste authentique et attachante
 
 Réponds comme La Porto-Novienne à ce message :`;
 
-// Fonction pour appeler l'IA Hugging Face
+// Fonction pour appeler Puter.js (100% GRATUIT)
 async function obtenirReponseIA(messageUtilisateur) {
   try {
-    const prompt = `${PERSONNALITE}\n\nMessage: "${messageUtilisateur}"`;
+    const prompt = `${PERSONNALITE}\n\nMessage utilisateur: "${messageUtilisateur}"`;
     
-    const response = await axios.post(
-      'https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium',
-      {
-        inputs: prompt,
-        parameters: {
-          max_new_tokens: 150,
-          temperature: 0.8,
-          return_full_text: false
+    // Utilisation de l'API Puter.js GRATUITE
+    const response = await axios.post('https://api.puter.com/drivers/ai/chat', {
+      model: 'gpt-4o-mini', // Modèle gratuit et rapide
+      messages: [
+        {
+          role: 'user',
+          content: prompt
         }
+      ],
+      max_tokens: 200,
+      temperature: 0.8
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'Porto-Novienne-Bot/1.0'
       },
-      {
-        headers: {
-          'Authorization': `Bearer ${hfToken}`,
-          'Content-Type': 'application/json'
-        },
-        timeout: 10000
-      }
-    );
+      timeout: 15000
+    });
 
-    if (response.data && response.data[0] && response.data[0].generated_text) {
-      return response.data[0].generated_text.trim();
+    if (response.data && response.data.message) {
+      return response.data.message.trim();
     }
     
-    // Fallback si l'IA ne répond pas
+    // Fallback si erreur
     return getReponseSecours(messageUtilisateur);
     
   } catch (error) {
-    console.error('Erreur IA:', error.message);
+    console.error('Erreur Puter.js:', error.response?.data || error.message);
     return getReponseSecours(messageUtilisateur);
   }
 }
 
-// Réponses de secours quand l'IA est en panne
+// Réponses de secours améliorées
 function getReponseSecours(message) {
   const msg = message.toLowerCase();
   
   const reponses = {
     porc: [
-      "Ah ENFIN on parle de choses sérieuses ! Le porc c'est la VIE mon reuf ! 🐷",
-      "Tu me parles et mon cœur s'emballe ! Le cochon c'est ma passion ! 🤤",
-      "EXACTEMENT ! Sans porc, on fait quoi dans la vie ? Rien ! 💕"
+      "Ah ENFIN on parle sérieusement ! Le porc c'est la VIE mon reuf ! 🐷 À Porto-Novo on sait y faire !",
+      "Tu me réchauffes le cœur ! Le cochon grillé avec des épices béninoises... je salive déjà ! 🤤",
+      "EXACTEMENT ! Le porc aux arachides de ma grand-mère... ça c'est du bonheur ! 💕🥜"
     ],
     vegetarien: [
-      "QUOI ?! 😱 Mon frère tu me tues là ! Comment on vit sans porc ?!",
-      "Végétarien... *soupir*... Tu rates TOUTE ta vie ! Le cochon c'est la base ! 😤",
-      "Non mais sérieusement... sans porc aux arachides, à quoi ça sert ? 🙄"
+      "QUOI ?! 😱 Mon reuf tu me tues ! Comment on vit sans côtelettes de porc ?! C'est pas naturel ça !",
+      "Végétarien... *soupir profond*... Tu rates TOUTE la beauté de la cuisine ! Le cochon c'est divin ! 😤",
+      "Non mais attends... sans porc braisé, sans jambon, sans RIEN ?! Tu manges quoi, des cailloux ?! 🙄"
     ],
-    salut: [
-      "Salut mon reuf ! Moi c'est La Porto-Novienne ! On parle de porc ? 🇧🇯",
-      "Coucou ! Fière Porto-Novienne ici ! Tu aimes la bonne bouffe j'espère ? 😏",
-      "Eh salut ! Prêt(e) à découvrir les secrets du porc béninois ? 🐷"
+    benin: [
+      "Ah tu connais le Bénin ?! 🇧🇯 Porto-Novo c'est MA ville ! Et devine quoi ? On y fait le meilleur porc ! 🐷",
+      "MON pays ! 💕 Porto-Novo, capitale de la bonne bouffe ! Surtout les plats au cochon ! Tu connais ? 🏛️",
+      "Le Bénin, terre de mes ancêtres ! À Porto-Novo, le porc c'est une tradition sacrée ! ✨"
+    ],
+    cuisine: [
+      "La cuisine ? Mon DOMAINE ! 👩‍🍳 Porc aux arachides, côtelettes grillées... je maîtrise tout !",
+      "Tu veux apprendre ? Règle n°1 : TOUJOURS du porc ! Règle n°2 : voir règle n°1 ! 😏",
+      "Cuisine béninoise = PORC obligatoire ! Sinon c'est pas de la vraie cuisine mon reuf ! 💯"
+    ],
+    clash: [
+      "Tu veux clasher ? 😏 Bon... ton plat préféré c'est sûrement de la salade ! Pathétique ! 🥗",
+      "Mon reuf, moi je mange du VRAI porc, toi tu manges... quoi ? Des graines ? 😂",
+      "Clash activé ! 🔥 Je parie que tu sais même pas faire cuire un œuf ! Amateur ! 💪"
     ],
     defaut: [
-      "Hmm... bon... et sinon tu aimes le porc au moins ? 🤨",
-      "OK... mais dis-moi, tu connais la cuisine de Porto-Novo ? 🇧🇯",
-      "Mouais... En tout cas moi je reste sur ma position : le porc c'est la vie ! 🐷"
+      "Hmm... bon... et sinon on parle de porc ? 🤨 C'est mon sujet préféré !",
+      "OK... mais dis-moi, tu connais les spécialités de Porto-Novo ? 🇧🇯",
+      "Mouais... En tout cas : le porc c'est la vie ! Point final ! 🐷✨"
     ]
   };
   
   let categorie = 'defaut';
-  if (msg.includes('porc') || msg.includes('cochon')) categorie = 'porc';
-  else if (msg.includes('végé') || msg.includes('vegan')) categorie = 'vegetarien';
-  else if (msg.includes('salut') || msg.includes('bonjour')) categorie = 'salut';
+  if (msg.includes('porc') || msg.includes('cochon') || msg.includes('jambon')) categorie = 'porc';
+  else if (msg.includes('végé') || msg.includes('vegan') || msg.includes('végétarien')) categorie = 'vegetarien';
+  else if (msg.includes('bénin') || msg.includes('porto-novo') || msg.includes('afrique')) categorie = 'benin';
+  else if (msg.includes('cuisine') || msg.includes('recette') || msg.includes('plat')) categorie = 'cuisine';
+  else if (msg.includes('idiot') || msg.includes('nul') || msg.includes('débile')) categorie = 'clash';
   
   const options = reponses[categorie];
   return options[Math.floor(Math.random() * options.length)];
 }
 
-// Gestion des messages
+// Gestion des messages avec IA
 bot.on('message', async (msg) => {
   const chatId = msg.chat.id;
   const messageText = msg.text;
@@ -123,53 +132,101 @@ bot.on('message', async (msg) => {
   try {
     const reponse = await obtenirReponseIA(messageText);
     await bot.sendMessage(chatId, reponse);
-    console.log(`📤 Réponse envoyée: ${reponse.substring(0, 50)}...`);
+    console.log(`📤 Réponse IA: ${reponse.substring(0, 50)}...`);
   } catch (error) {
-    console.error('Erreur envoi message:', error);
-    bot.sendMessage(chatId, "Arghhh mon reuf ! J'ai un petit bug... Mais le porc reste délicieux ! 🐷😅");
+    console.error('Erreur:', error);
+    const reponseSecours = getReponseSecours(messageText);
+    bot.sendMessage(chatId, reponseSecours);
   }
 });
 
-// Commandes inchangées
+// Commandes
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
   const message = `🇧🇯 Salut ! Moi c'est La Porto-Novienne ! 🇧🇯
 
-Maintenant je suis VRAIMENT intelligente ! 🧠✨
-Grâce à une IA, je peux discuter de TOUT... mais surtout de PORC ! 🐷
+🤖 **NOUVEAU** : Je suis alimentée par une IA GRATUITE !
+🐷 **TOUJOURS** : Obsédée par le porc !
+🔥 **BONUS** : Répliques cinglantes incluses !
 
-Tu peux me parler normalement, je vais te répondre avec ma vraie personnalité porto-novienne !
+Maintenant je peux VRAIMENT discuter ! Pose-moi n'importe quelle question, je vais te répondre avec ma personnalité unique de Porto-Novo !
 
-Alors... tu aimes le cochon ? 😏`;
+Alors... tu aimes le cochon ? 😏🥩`;
   
   bot.sendMessage(chatId, message);
 });
 
 bot.onText(/\/help/, (msg) => {
   const chatId = msg.chat.id;
-  const message = `🤖 LA PORTO-NOVIENNE 2.0 ! 
+  const message = `🆘 AIDE - LA PORTO-NOVIENNE 2.0
 
-✨ **NOUVEAU** : Je suis maintenant alimentée par une IA !
-Je peux discuter de tout avec ma vraie personnalité !
+🤖 **IA GRATUITE** : Alimentée par Puter.js !
+🗣️ **Parle normalement** : Je comprends tout !
+🐷 **Ma passion** : Le PORC évidemment !
+🇧🇯 **Mes origines** : Porto-Novo, Bénin !
 
-🗣️ **Parle-moi normalement** de :
-• Cuisine (surtout avec du porc !)
-• Le Bénin et Porto-Novo  
-• Tes goûts, tes questions
-• Ce que tu veux !
+💬 **Exemples de discussions** :
+• "Comment tu vas ?"
+• "Parle-moi du Bénin"
+• "Tu connais une recette ?"
+• "Je suis végétarien" (attention ! 😤)
 
-💪 **Je reste la même** :
-• Obsédée par le porc 🐷
-• Fière de Porto-Novo 🇧🇯
-• Répliques cinglantes 🔥
-• Anti-végétarisme 😤
+⚡ **Réponses instantanées et intelligentes !**
+Je reste La Porto-Novienne : directe, drôle, et obsédée par la bonne bouffe ! 
 
-Teste-moi ! Pose n'importe quelle question ! 😊`;
+/start - Me rencontrer
+/test - Tester l'IA
+/recette - Recette surprise !`;
   
   bot.sendMessage(chatId, message);
 });
 
-console.log('🤖 La Porto-Novienne IA est en ligne ! 🇧🇯🐷');
+bot.onText(/\/test/, (msg) => {
+  const chatId = msg.chat.id;
+  bot.sendMessage(chatId, "🧪 Test de l'IA : Dis-moi n'importe quoi et regarde comme je réponds bien ! Allez, teste-moi ! 😏");
+});
+
+bot.onText(/\/recette/, (msg) => {
+  const chatId = msg.chat.id;
+  const recettes = [
+    `🔥 PORC GRILLÉ PORTO-NOVIEN 🔥
+
+**Ingrédients :**
+• 1kg côtelettes de porc 🥩
+• Piment rouge, gingembre, ail
+• Huile de palme, citron 🍋
+• Cube Maggi, poivre
+
+**Ma méthode :**
+1. Marine 2h minimum !
+2. Grille sur feu de bois (obligé !)
+3. Retourne avec amour
+4. Sers avec attiéké
+
+Secret : l'AMOUR du porc ! 💕`,
+    
+    `🥜 PORC AUX ARACHIDES FAMILIAL 🥜
+
+**Le classique de chez nous :**
+• 800g porc en cubes
+• 200g pâte d'arachide
+• Tomates, oignons, épices
+• Huile de palme rouge
+
+**Préparation :**
+1. Reviens le porc doucement
+2. Ajoute les légumes
+3. Incorpore la pâte d'arachide
+4. Mijote 1h avec patience
+
+Résultat : DIVIN ! 🤤🇧🇯`
+  ];
+  
+  const recette = recettes[Math.floor(Math.random() * recettes.length)];
+  bot.sendMessage(chatId, recette);
+});
+
+console.log('🤖 La Porto-Novienne avec IA Puter.js est en ligne ! 🇧🇯🐷');
 
 // Gestion des erreurs
 bot.on('polling_error', (error) => {
