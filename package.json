@@ -1,18 +1,18 @@
 {
-  "name": "la-porto-novienne-ai-bot",
-  "version": "2.0.0",
-  "description": "Bot Telegram La Porto-Novienne avec IA - Obsédée par le porc et les répliques cinglantes",
+  "name": "la-porto-novienne-bot",
+  "version": "1.0.0",
+  "description": "Bot Telegram La Porto-Novienne avec IA Gemini",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js"
   },
-  "keywords": ["telegram", "bot", "benin", "porto-novo", "cuisine", "ai", "huggingface"],
+  "keywords": ["telegram", "bot", "benin", "porto-novo", "cuisine", "ai", "gemini"],
   "author": "Ton nom",
   "license": "MIT",
   "dependencies": {
     "node-telegram-bot-api": "^0.64.0",
-    "axios": "^1.6.0"
+    "@google/generative-ai": "^0.11.3"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
