@@ -2,8 +2,8 @@ const TelegramBot = require('node-telegram-bot-api');
 const axios = require('axios');
 
 // Configuration
-const token = process.env.BOT_TOKEN || 'TON_TOKEN_ICI';
-const hfToken = process.env.HUGGINGFACE_TOKEN || 'TON_HF_TOKEN'; // Gratuit sur huggingface.co
+const token = process.env.BOT_TOKEN || '8430101755:AAEBLrRf6GZWHdMHEhjvkowh6jzeOkF4wNU';
+const hfToken = process.env.HUGGINGFACE_TOKEN || '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'; // Gratuit sur huggingface.co
 
 if (!token || token === 'TON_TOKEN_ICI') {
   console.error('❌ Token Telegram manquant !');
