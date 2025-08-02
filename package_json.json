@@ -1,0 +1,22 @@
+{
+  "name": "la-porto-novienne-bot",
+  "version": "1.0.0",
+  "description": "Bot Telegram La Porto-Novienne - Obsédée par le porc et les répliques cinglantes",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "keywords": ["telegram", "bot", "benin", "porto-novo", "cuisine"],
+  "author": "Ton nom",
+  "license": "MIT",
+  "dependencies": {
+    "node-telegram-bot-api": "^0.64.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
