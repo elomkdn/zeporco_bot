@@ -1,18 +1,18 @@
 {
   "name": "la-porto-novienne-bot",
   "version": "1.0.0",
-  "description": "Bot Telegram La Porto-Novienne avec IA Mistral",
+  "description": "Bot Telegram La Porto-Novienne avec IA Gemini",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js"
   },
-  "keywords": ["telegram", "bot", "benin", "porto-novo", "cuisine", "ai", "mistral"],
+  "keywords": ["telegram", "bot", "benin", "porto-novo", "cuisine", "ai", "gemini"],
   "author": "Ton nom",
   "license": "MIT",
   "dependencies": {
     "node-telegram-bot-api": "^0.64.0",
-    "@mistralai/mistralai": "^0.1.1" 
+    "@google/generative-ai": "^0.1.3"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
