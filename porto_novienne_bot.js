@@ -1,7 +1,7 @@
 const TelegramBot = require('node-telegram-bot-api');
 
 // Configuration du token (priorité aux variables d'environnement)
-const token = process.env.BOT_TOKEN || 'TON_TOKEN_ICI';
+const token = process.env.BOT_TOKEN || '8430101755:AAEBLrRf6GZWHdMHEhjvkowh6jzeOkF4wNU';
 
 // Vérification du token
 if (!token || token === 'TON_TOKEN_ICI') {
