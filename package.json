@@ -1,18 +1,18 @@
 {
   "name": "la-porto-novienne-bot",
   "version": "1.0.0",
-  "description": "Bot Telegram La Porto-Novienne avec IA Hugging Face",
+  "description": "Bot Telegram La Porto-Novienne avec IA Mistral",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js"
   },
-  "keywords": ["telegram", "bot", "benin", "porto-novo", "cuisine", "ai", "huggingface"],
+  "keywords": ["telegram", "bot", "benin", "porto-novo", "cuisine", "ai", "mistral"],
   "author": "Ton nom",
   "license": "MIT",
   "dependencies": {
     "node-telegram-bot-api": "^0.64.0",
-    "axios": "^1.6.8"
+    "@mistralai/mistralai": "^0.0.12"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
