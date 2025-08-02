@@ -1,8 +1,36 @@
 const TelegramBot = require('node-telegram-bot-api');
 
-// Remplace par ton token obtenu de @BotFather
-const token = '8430101755:AAEBLrRf6GZWHdMHEhjvkowh6jzeOkF4wNU';
-const bot = new TelegramBot(token, {polling: true});
+// Configuration du token (priorité aux variables d'environnement)
+const token = process.env.BOT_TOKEN || 'TON_TOKEN_ICI';
+
+// Vérification du token
+if (!token || token === 'TON_TOKEN_ICI') {
+  console.error('❌ ERREUR : Token manquant ! Vérifie ta variable BOT_TOKEN');
+  process.exit(1);
+}
+
+console.log('🚀 Démarrage du bot...');
+console.log('📡 Token configuré :', token.substring(0, 10) + '...');
+
+// Création du bot avec options améliorées
+const bot = new TelegramBot(token, {
+  polling: {
+    interval: 300,
+    autoStart: true,
+    params: {
+      timeout: 10
+    }
+  }
+});
+
+// Test de connexion
+bot.getMe().then((botInfo) => {
+  console.log('✅ Bot connecté !');
+  console.log('👤 Nom :', botInfo.first_name);
+  console.log('🆔 Username :', botInfo.username);
+}).catch((error) => {
+  console.error('❌ Erreur de connexion :', error.message);
+});
 
 // Personnalité de La Porto-Novienne
 const reponses = {
